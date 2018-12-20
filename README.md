@@ -65,6 +65,8 @@ Interprocess communication is employing REST HTTP protocol, that is a de-facto m
 * Hosting a static page with an ASP.<span></span>NET Core application looks way too excessive.  
   Being not limited in options, I would rather employ a more lightweight server.
 
+* Frontend UI, as well as invoice content look and feel might be improved a lot.
+
 * Minikube deployment automated with a PowerShell script restricts the executing environment to Windows.  
   That can be easily ported to bash script.
 
