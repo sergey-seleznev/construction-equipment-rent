@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: construction-equipment-rent-api
+spec:
+  selector:
+    matchLabels:
+      app: construction-equipment-rent-api
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: construction-equipment-rent-api
+    spec:
+      containers:
+      - name: construction-equipment-rent-api
+        image: localhost:5000/construction-equipment-rent.api
+        ports:
+        - name: http
+          containerPort: 80
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Live
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: construction-equipment-rent-api
+spec:
+  selector:
+    app: construction-equipment-rent-api
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
