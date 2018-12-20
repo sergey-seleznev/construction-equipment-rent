@@ -1,0 +1,214 @@
+﻿@page
+
+@using ConstructionEquipmentRent.Web.Options
+@using Microsoft.Extensions.Options
+@inject IOptions<ApiOptions> apiOptions
+
+@section Scripts
+{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.12/handlebars.min.js"></script>
+
+    <script id="stock-template" type="text/x-handlebars-template">
+        <h2>Available equipment</h2>
+        <div class="stock-item stock-item-header">
+            <span class="stock-item-name">Type</span>
+            <span class="stock-item-input-header">Days</span>
+        </div>
+        {{#each .}}
+        <div class="stock-item">
+            <span class="stock-item-name">{{name}}</span>
+            <input class="stock-item-input" data-stock-item-id="{{id}}" type="number" min="0" size="2" />
+        </div>
+        {{/each}}
+        <button id="stock-items-submit">Add to cart</button>
+    </script>
+
+    <script id="cart-template" type="text/x-handlebars-template">
+        <h2>Cart</h2>
+        {{#each .}}
+        <div>
+            <span class="cart-item-name">{{name}} × {{durationDays}}d</span>
+        </div>
+        {{/each}}
+        <button id="cart-get-invoice">Get invoice</button>
+    </script>
+
+    <script id="invoice-template" type="text/x-handlebars-template">
+        <h2>Invoice</h2>
+        <div>
+            <textarea id="invoice-text" readonly>{{.}}</textarea>
+        </div>
+        <button id="invoice-download">Download</button>
+    </script>
+
+    <script>
+
+        var apiBaseUrl = '@apiOptions.Value.BaseUrl';
+
+        var stock;
+        var invoiceText;
+
+        var stockTemplate, cartTemplate, invoiceTemplate;
+        var stockPlaceholder, cartPlaceholder, invoicePlaceholder;
+
+        function getStock() {
+            return fetch(apiBaseUrl + '/stock')
+                .then(response => response.json())
+                .then(loadedStock => Promise.resolve(stock = loadedStock))
+                .catch(err => alert(`Unable to load stock items!\n${err}`));
+        }
+
+        function renderStock(stock) {
+            stockPlaceholder.innerHTML = stockTemplate(stock);
+            document.getElementById('stock-items-submit')
+                .addEventListener('click', addToCart);
+        }
+
+        function renderExistingCart() {
+            var orderId = getCurrentOrderId();
+            if (orderId) {
+                fetch(apiBaseUrl + `/orders/${orderId}`)
+                    .then(response => response.json())
+                    .then(order => renderCart(order.items))
+                    .catch(() => setCurrentOrderId());
+            }
+        }
+
+        function renderCart(items) {
+            var cartContext = items.map(i => {
+                var stockItem = stock.find(s => s.id === i.stockItemId);
+                return {
+                    name: stockItem.name,
+                    durationDays: i.durationDays
+                };
+            });
+            cartPlaceholder.innerHTML = cartTemplate(cartContext);
+            document.getElementById('cart-get-invoice')
+                .addEventListener('click', getInvoice);
+        }
+
+        function addToCart() {
+            var items = getItemsToAddToCart();
+            if (items.length === 0) return;
+            getOrderId()
+                .then(orderId => fetch(apiBaseUrl + `/orders/${orderId}/items`,
+                    {
+                        method: 'POST',
+                        headers: { "Content-Type": "application/json; charset=utf-8" },
+                        body: JSON.stringify(items)
+                    }))
+                .then(response => response.json())
+                .then(orderItems => renderCart(orderItems))
+                .then(() => {
+                    clearSelectedStockItems();
+                    hideInvoice();
+                })
+                .catch(err => { debugger; });
+        }
+
+        function clearSelectedStockItems() {
+            var stockInputs = stockPlaceholder.getElementsByClassName('stock-item-input');
+            Array.from(stockInputs).forEach(stockInput => stockInput.value = '');
+        }
+
+        function getItemsToAddToCart() {
+            var stockInputs = stockPlaceholder.getElementsByClassName('stock-item-input');
+            return Array.from(stockInputs)
+                .map(i => {
+                    return {
+                        stockItemId: i.dataset.stockItemId,
+                        durationDays: i.value
+                    };
+                })
+                .filter(i => i.durationDays > 0);
+        }
+
+        function getInvoice() {
+            var orderId = getCurrentOrderId();
+            fetch(apiBaseUrl + `/orders/${orderId}/invoice`)
+                .then(response => response.text())
+                .then(text => {
+                    invoiceText = text;
+                    invoicePlaceholder.innerHTML = invoiceTemplate(text);
+                    document.getElementById('invoice-download')
+                        .addEventListener('click',
+                            downloadText.bind(this, `Invoice #${orderId}.txt`, text));
+                })
+                .catch(err => { debugger; });
+        }
+
+        function hideInvoice() {
+            invoicePlaceholder.innerHTML = '';
+        }
+
+        function getOrderId() {
+            var orderId = getCurrentOrderId();
+            return (orderId)
+                ? Promise.resolve(orderId)
+                : fetch(apiBaseUrl + '/orders', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(order => {
+                        var orderId = order.id;
+                        setCurrentOrderId(orderId);
+                        return Promise.resolve(orderId);
+                    });
+        }
+
+        function getCurrentOrderId() {
+            return new URL(window.location.href)
+                .searchParams.get('orderId');
+        }
+
+        function setCurrentOrderId(orderId) {
+            var url = new URL(window.location.href);
+            if (orderId) url.searchParams.set('orderId', orderId);
+            else url.searchParams.delete('orderId');
+            window.history.pushState(null, document.title, url.toString());
+        }
+
+        function downloadText(name, text) {
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', name);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function detectPageElements() {
+            stockTemplate = compileHandlebarsTemplate('stock-template');
+            cartTemplate = compileHandlebarsTemplate('cart-template');
+            invoiceTemplate = compileHandlebarsTemplate('invoice-template');
+            stockPlaceholder = document.getElementById('stock');
+            cartPlaceholder = document.getElementById('cart');
+            invoicePlaceholder = document.getElementById('invoice');
+        }
+
+        function compileHandlebarsTemplate(scriptId) {
+            var script = document.getElementById(scriptId);
+            return Handlebars.compile(script.innerHTML);
+        }
+
+        addEventListener('load',
+            () => {
+                detectPageElements();
+                var stock = getStock();
+                stock.then(renderStock);
+                stock.then(renderExistingCart);
+            });
+    </script>
+}
+
+<div class="row">
+
+    <div class="column">
+        <div id="stock"></div>
+    </div>
+
+    <div class="column">
+        <div id="cart"></div>
+        <div id="invoice"></div>
+    </div>
+
+</div>

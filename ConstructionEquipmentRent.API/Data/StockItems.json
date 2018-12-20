@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "name": "Caterpillar bulldozer",
+    "type": "Heavy"
+  },
+  {
+    "id": 2,
+    "name": "KamAZ truck",
+    "type": "Regular"
+  },
+  {
+    "id": 3,
+    "name": "Komatsu crane",
+    "type": "Heavy"
+  },
+  {
+    "id": 4,
+    "name": "Volvo steamroller",
+    "type": "Regular"
+  },
+  {
+    "id": 5,
+    "name": "Bosch jackhammer",
+    "type": "Specialized"
+  }
+]
