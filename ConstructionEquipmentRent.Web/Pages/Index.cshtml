@@ -116,8 +116,8 @@
             return Array.from(stockInputs)
                 .map(i => {
                     return {
-                        stockItemId: i.dataset.stockItemId,
-                        durationDays: i.value
+                        stockItemId: +i.dataset.stockItemId,
+                        durationDays: +i.value
                     };
                 })
                 .filter(i => i.durationDays > 0);
