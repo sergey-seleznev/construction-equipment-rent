@@ -44,7 +44,7 @@ namespace ConstructionEquipmentRent.API.Tests
             var invoice = await sut.Generate(order);
 
             orderItems.ForEach(i =>
-                Assert.Contains($"\nstock-item-{i.StockItemId}\t\t{i.StockItemId * i.DurationDays}\n", invoice));            
+                Assert.Contains($"\nstock-item-{i.StockItemId}\t\t{i.StockItemId * i.DurationDays}€\n", invoice));            
         }
 
         [Theory, AutoMoqData]
@@ -70,7 +70,7 @@ namespace ConstructionEquipmentRent.API.Tests
             var invoice = await sut.Generate(order);
             var expectedTotalPrice = orderItems.Sum(i => i.StockItemId * i.DurationDays);
 
-            Assert.Contains($"\nTOTAL\t\t{expectedTotalPrice}\n", invoice);
+            Assert.Contains($"\nTOTAL\t\t{expectedTotalPrice}€\n", invoice);
         }
 
         [Theory, AutoMoqData]

@@ -59,10 +59,10 @@ namespace ConstructionEquipmentRent.API.Services
                 totalPrice += price.Value;
                 totalBonus += bonus.Value;
                 
-                sb.AppendFormat("{0}\t\t{1}\n", stockItem.Name, price);
+                sb.AppendFormat("{0}\t\t{1}€\n", stockItem.Name, price);
             }
 
-            sb.AppendFormat("\nTOTAL\t\t{0}\n", totalPrice);
+            sb.AppendFormat("\nTOTAL\t\t{0}€\n", totalPrice);
             sb.AppendFormat("BONUS\t\t{0}pt.", totalBonus);
 
             return sb.ToString();
