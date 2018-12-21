@@ -22,7 +22,7 @@ Frontend is implemented as a pretty much static single web page, querying all th
 That helps to offload frontend application, that only needs to give away static resources in this approach.  
 Due to that fact, there are no direct calls from web server to the API. API is only queried from client-side browser JavaScript.  
 So the communication flow looks like that: `[Web server] <=> [Web client] <=> [API server]`.  
-Interprocess communication is employing REST HTTP protocol, that is a de-facto modern scalable applications standart.
+Interprocess communication is employing REST HTTP protocol, that is a de-facto modern scalable application standard.
 
 ## Running
 
@@ -70,7 +70,7 @@ Interprocess communication is employing REST HTTP protocol, that is a de-facto m
 * Minikube deployment automated with a PowerShell script restricts the executing environment to Windows.  
   That can be easily ported to bash script.
 
-* Normally the kubernetes configuration would bind services to proper DNS hostnames rather than dynamically assigned IP addresses.  
+* Normally Kubernetes configuration would bind services to proper DNS hostnames rather than dynamically assigned IPs.  
   That would eliminate the need to retrieve and pass the non-static API endpoint URL into the Web deployment.
 
 * Kubernetes deployment offers excellent scaling opportunities to the backend service.  
