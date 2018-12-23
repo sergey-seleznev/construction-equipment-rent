@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build-API",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/ConstructionEquipmentRent.API/ConstructionEquipmentRent.API.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build-Web",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/ConstructionEquipmentRent.Web/ConstructionEquipmentRent.Web.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
