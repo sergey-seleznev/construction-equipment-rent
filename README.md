@@ -1,5 +1,7 @@
 # ConstructionEquipmentRent
 
+This repository contains my solution to a software developer position home assignment at [Bondora](https://www.bondora.com/en).
+
 ## Solution layout
 
 The solution consists of 3 projects and a folder of deployment setup:
